@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin - Sertifikat Pembelajaran Mandiri</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- SheetJS untuk Export Excel (.xlsx) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #F3F6F4;
+      --primary-green: #5B6E2C;
+      --accent-orange: #FF5A22;
+    }
+    body {
+      background-color: var(--bg-base);
+    }
+    .wavy-gradient-hero {
+      background: linear-gradient(135deg, #5B6E2C 0%, #465522 55%, #38451b 100%);
+    }
+    .fluid-glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .fluid-card {
+      border-radius: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 30px -5px rgba(91, 110, 44, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .fluid-card:hover {
+      box-shadow: 0 16px 36px -6px rgba(91, 110, 44, 0.14);
+      transform: translateY(-2px);
+    }
+    .primary-btn {
+      background-color: #5B6E2C;
+      transition: all 0.2s ease;
+    }
+    .primary-btn:hover {
+      background-color: #4a5a24;
+      transform: translateY(-1px);
+    }
+    .accent-btn {
+      background-color: #FF5A22;
+      transition: all 0.2s ease;
+    }
+    .accent-btn:hover {
+      background-color: #e64a15;
+      transform: translateY(-1px);
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: #d1d5db;
+      border-radius: 9999px;
+    }
+    /* Custom Scrollbar Horizontal bertema Olive Green */
+    .scrollbar-theme-h::-webkit-scrollbar {
+      height: 6px;
+    }
+    .scrollbar-theme-h::-webkit-scrollbar-track {
+      background: #F3F6F4;
+      border-radius: 9999px;
+    }
+    .scrollbar-theme-h::-webkit-scrollbar-thumb {
+      background: #5B6E2C;
+      border-radius: 9999px;
+      opacity: 0.7;
+    }
+    .scrollbar-theme-h::-webkit-scrollbar-thumb:hover {
+      background: #465522;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans text-slate-800 antialiased selection:bg-[#FF5A22] selection:text-white pb-12">
+
+  <div id="app" class="relative overflow-x-hidden">
+
+    <!-- Decorative Organic Background Blobs -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 rounded-full bg-[#5B6E2C]/5 blur-3xl pointer-events-none -z-10"></div>
+    <div class="fixed bottom-10 right-10 w-[30rem] h-[30rem] rounded-full bg-[#FF5A22]/5 blur-3xl pointer-events-none -z-10"></div>
+
+    <!-- Header & Hero Wavy Area -->
+    <header class="wavy-gradient-hero text-white rounded-b-[2.5rem] lg:rounded-b-[3.5rem] shadow-xl relative overflow-hidden">
+      <!-- Decorative Background Waves -->
+      <svg class="absolute inset-0 w-full h-full opacity-10 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="#ffffff" fill-opacity="1" d="M0,192L48,197.3C96,203,192,213,288,197.3C384,181,480,139,576,144C672,149,768,203,864,208C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      </svg>
+
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 pt-6 pb-12 relative z-10">
+        <!-- Top Action Bar (Clean layout tanpa scroll anchor) -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+              <i class="fa-solid fa-graduation-cap text-2xl text-emerald-200"></i>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold tracking-[0.2em] text-emerald-200 block">Sistem Monitoring Terpadu</span>
+              <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white leading-tight">Sertifikat Pembelajaran Mandiri</h1>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center flex-wrap gap-2.5">
+            <button 
+              type="button"
+              @click="openExportModal" 
+              :disabled="items.length === 0" 
+              class="px-4 py-2 rounded-2xl accent-btn text-white text-xs font-extrabold transition flex items-center gap-2 shadow-md disabled:opacity-40"
+            >
+              <i class="fa-solid fa-file-excel"></i>
+              <span>Export Excel</span>
+            </button>
+            <button 
+              type="button"
+              @click="manualRefresh" 
+              class="px-3 py-2 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/20 text-white flex items-center gap-1.5 transition shadow-sm text-xs font-bold"
+              :title="'Klik untuk refresh manual. Auto-reload aktif (' + autoRefreshCountdown + 's)'"
+            >
+              <i :class="['fa-solid fa-rotate text-xs', isLoading ? 'fa-spin' : '']"></i>
+              <span class="text-[11px] font-mono tracking-tight">{{ autoRefreshCountdown }}s</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Hero Sub-Banner & Quick Metric Summary -->
+        <div class="mt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <p class="text-xs text-white/80 max-w-xl leading-relaxed">
+              Pantau rekapitulasi pengumpulan sertifikat guru dan pegawai di seluruh kecamatan, lengkap dengan rincian unit sekolah dan klasifikasi jabatan.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-white/15 self-start md:self-auto">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-[11px] font-bold text-white tracking-wide">
+              Data Sinkron Google Drive & Sheet
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 space-y-6 relative z-20">
+
+      <!-- Baris 1: 4 Kartu Statistik Utama -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Metric 1: Pegawai Terkumpul -->
+        <div class="fluid-glass fluid-card p-5 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#5B6E2C]">Total Pegawai</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-3xl font-black text-slate-800">{{ items.length }}</span>
+              <span class="text-xs font-bold text-slate-400">/ {{ totalTarget }} org</span>
+            </div>
+            <p class="text-[11px] font-bold text-slate-500 mt-1">
+              <span class="text-[#5B6E2C] font-extrabold">{{ overallPercentage }}%</span> terpenuhi
+            </p>
+          </div>
+          <div class="w-13 h-13 rounded-2xl bg-[#5B6E2C]/10 text-[#5B6E2C] flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-users"></i>
+          </div>
+        </div>
+
+        <!-- Metric 2: Total Dokumen Sertifikat -->
+        <div class="fluid-glass fluid-card p-5 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#FF5A22]">Dokumen Masuk</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-3xl font-black text-[#FF5A22]">{{ totalCertificates }}</span>
+              <span class="text-xs font-bold text-slate-400">berkas</span>
+            </div>
+            <p class="text-[11px] font-bold text-slate-500 mt-1">
+              Rata-rata <span class="font-extrabold text-slate-700">{{ averageCertificates }}</span> berkas/pegawai
+            </p>
+          </div>
+          <div class="w-13 h-13 rounded-2xl bg-[#FF5A22]/10 text-[#FF5A22] flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-award"></i>
+          </div>
+        </div>
+
+        <!-- Metric 3: Total Unit Kerja / Sekolah -->
+        <div class="fluid-glass fluid-card p-5 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#5B6E2C]">Unit Berpartisipasi</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-3xl font-black text-slate-800">{{ uniqueTempatTugasCount }}</span>
+              <span class="text-xs font-bold text-slate-400">sekolah/unit</span>
+            </div>
+            <p class="text-[11px] font-bold text-slate-500 mt-1">
+              Tersebar di 5 kecamatan
+            </p>
+          </div>
+          <div class="w-13 h-13 rounded-2xl bg-[#5B6E2C]/10 text-[#5B6E2C] flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-school"></i>
+          </div>
+        </div>
+
+        <!-- Metric 4: Kecamatan Terbanyak -->
+        <div class="fluid-glass fluid-card p-5 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700">Tertinggi</span>
+            <div class="flex items-baseline gap-1 mt-1 truncate max-w-[140px]">
+              <span class="text-2xl font-black text-emerald-800 truncate">{{ topKecamatan.name }}</span>
+            </div>
+            <p class="text-[11px] font-bold text-slate-500 mt-1">
+              {{ topKecamatan.count }} org ({{ topKecamatan.certCount }} berkas)
+            </p>
+          </div>
+          <div class="w-13 h-13 rounded-2xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Baris 2: Progress Per Kecamatan & Panel Status / Jabatan -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- Kolom Kiri (lg:col-span-9): Progress 5 Kecamatan -->
+        <div class="lg:col-span-9 fluid-glass fluid-card p-5 sm:p-6 flex flex-col justify-center">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3.5">
+            <div>
+              <span class="text-[11px] font-bold text-[#5B6E2C] uppercase tracking-wider">Wilayah Kerja</span>
+              <h3 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                <span>Progress Pengumpulan Per Kecamatan</span>
+                <span class="text-xs font-bold text-slate-400">({{ kecamatanList.length }} Wilayah)</span>
+              </h3>
+            </div>
+          </div>
+
+          <!-- 5 Kartu Kecamatan (Bisa diklik untuk buka popup detail sekolah) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5 items-stretch">
+            <div 
+              v-for="stat in kecamatanStats" 
+              :key="stat.name"
+              @click="openKecamatanDetail(stat)"
+              :class="[
+                'rounded-2xl transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-sm hover:shadow-lg',
+                selectedKecamatan === stat.name 
+                  ? 'bg-[#5B6E2C] text-white ring-4 ring-[#FF5A22]/40 -translate-y-1' 
+                  : 'bg-[#5B6E2C] text-white hover:-translate-y-1'
+              ]"
+            >
+              <!-- Bagian Atas & Tengah Kartu (Hijau Tema #5B6E2C) -->
+              <div class="p-4 flex flex-col justify-between flex-1">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-extrabold text-sm tracking-wide text-white">{{ stat.name }}</h4>
+                  <span class="w-2 h-2 rounded-full" :class="stat.count > 0 ? 'bg-emerald-300 animate-pulse' : 'bg-white/30'"></span>
+                </div>
+
+                <div class="my-2.5 flex items-baseline gap-1.5">
+                  <span class="text-3xl font-black text-white">
+                    {{ stat.count }}
+                  </span>
+                  <span class="text-xs font-bold text-emerald-100/80">
+                    Pegawai
+                  </span>
+                </div>
+              </div>
+
+              <!-- Bagian Bawah Kartu (Hijau Lebih Pudar / Muted Translucent Olive) -->
+              <div class="px-4 py-2.5 bg-[#465522]/45 backdrop-blur-xs border-t border-white/10 flex items-center justify-between text-[11px] text-emerald-100">
+                <span class="font-medium text-white/80">{{ stat.unitCount }} Unit</span>
+                <span class="text-[#FF5A22] font-black group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 bg-white/95 px-2 py-0.5 rounded-full text-[10px] shadow-xs">
+                  Detail <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan (lg:col-span-3): Filter Cepat Status & Akses Modal Jabatan -->
+        <div class="lg:col-span-3 fluid-glass fluid-card p-6 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-[#5B6E2C] uppercase tracking-wider">Kategori Pegawai</span>
+              <h3 class="text-base font-extrabold text-slate-800">Status & Jabatan</h3>
+            </div>
+            <button 
+              type="button"
+              @click="openJabatanModal()" 
+              class="px-2.5 py-1 rounded-full bg-[#FF5A22]/10 text-[#FF5A22] hover:bg-[#FF5A22] hover:text-white transition text-[10px] font-extrabold flex items-center gap-1 shadow-sm"
+              title="Lihat rincian pegawai per jabatan"
+            >
+              <i class="fa-solid fa-list-check"></i> Detail Jabatan
+            </button>
+          </div>
+
+          <!-- Pilihan Status Cepat -->
+          <div class="space-y-2 my-4">
+            <button 
+              type="button"
+              @click="handleStatusClick('')"
+              :class="selectedStatus === '' ? 'bg-[#5B6E2C] text-white shadow-md' : 'bg-[#F3F6F4] text-slate-700 hover:bg-slate-200'"
+              class="w-full px-3.5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center justify-between group active:scale-[0.98]"
+            >
+              <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-sm"></i> Semua Status</span>
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-full" :class="selectedStatus === '' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">
+                {{ items.length }}
+              </span>
+            </button>
+
+            <button 
+              type="button"
+              @click="handleStatusClick('PPPK')"
+              :class="selectedStatus === 'PPPK' ? 'bg-[#FF5A22] text-white shadow-md' : 'bg-[#F3F6F4] text-slate-700 hover:bg-slate-200'"
+              class="w-full px-3.5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center justify-between group active:scale-[0.98]"
+            >
+              <span class="flex items-center gap-2"><i class="fa-solid fa-user-check text-sm"></i> PPPK Penuh</span>
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-full" :class="selectedStatus === 'PPPK' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">
+                {{ countByStatus('PPPK') }}
+              </span>
+            </button>
+
+            <button 
+              type="button"
+              @click="handleStatusClick('PPPK Paruh Waktu')"
+              :class="selectedStatus === 'PPPK Paruh Waktu' ? 'bg-[#FF5A22] text-white shadow-md' : 'bg-[#F3F6F4] text-slate-700 hover:bg-slate-200'"
+              class="w-full px-3.5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center justify-between group active:scale-[0.98]"
+            >
+              <span class="flex items-center gap-2"><i class="fa-solid fa-user-clock text-sm"></i> PPPK Paruh Waktu</span>
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-full" :class="selectedStatus === 'PPPK Paruh Waktu' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">
+                {{ countByStatus('PPPK Paruh Waktu') }}
+              </span>
+            </button>
+
+            <button 
+              type="button"
+              @click="handleStatusClick('PNS')"
+              :class="selectedStatus === 'PNS' ? 'bg-[#5B6E2C] text-white shadow-md' : 'bg-[#F3F6F4] text-slate-700 hover:bg-slate-200'"
+              class="w-full px-3.5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center justify-between group active:scale-[0.98]"
+            >
+              <span class="flex items-center gap-2"><i class="fa-solid fa-id-badge text-sm"></i> PNS</span>
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-full" :class="selectedStatus === 'PNS' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">
+                {{ countByStatus('PNS') }}
+              </span>
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span class="italic flex items-center gap-1"><i class="fa-solid fa-arrow-down-short-wide text-[10px]"></i> Klik filter tabel</span>
+            <button 
+              type="button"
+              @click="openJabatanModal(selectedStatus)" 
+              class="font-extrabold text-[#5B6E2C] hover:text-[#FF5A22] transition flex items-center gap-1"
+            >
+              Rincian Jabatan <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Baris 3: Tabel Utama Semua Pegawai Pengumpul -->
+      <div id="tabel-pengumpul" class="fluid-glass fluid-card p-6 space-y-4">
+        <!-- Table Toolbar -->
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-200/80 pb-4">
+          <div>
+            <span class="text-[11px] font-bold text-[#5B6E2C] uppercase tracking-wider">Database Master</span>
+            <div class="flex items-center gap-2 mt-0.5">
+              <h3 class="text-lg font-extrabold text-slate-800">Daftar Pengumpul Sertifikat</h3>
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-[#5B6E2C]/10 text-[#5B6E2C] font-extrabold">
+                {{ filteredData.length }} Pegawai
+              </span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-[#FF5A22]/10 text-[#FF5A22] font-extrabold">
+                {{ filteredCertificateCount }} Berkas
+              </span>
+            </div>
+          </div>
+
+          <!-- Controls: Kecamatan Filter, Status Filter & Live Search -->
+          <div class="flex flex-col sm:flex-row items-center gap-2.5 w-full lg:w-auto">
+            <!-- Filter Status Dropdown -->
+            <select 
+              v-model="selectedStatus" 
+              class="w-full sm:w-40 px-3 py-2 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#5B6E2C]"
+            >
+              <option value="">Semua Status</option>
+              <option v-for="st in statusList" :key="st" :value="st">{{ st }}</option>
+            </select>
+
+            <!-- Filter Kecamatan Dropdown -->
+            <select 
+              v-model="selectedKecamatan" 
+              class="w-full sm:w-44 px-3 py-2 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#5B6E2C]"
+            >
+              <option value="">Semua Kecamatan</option>
+              <option v-for="kec in kecamatanList" :key="kec" :value="kec">Kec. {{ kec }}</option>
+            </select>
+
+            <!-- Input Search -->
+            <div class="relative w-full sm:w-64">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+              </span>
+              <input 
+                type="text" 
+                v-model="searchQuery" 
+                placeholder="Cari NIP, nama, unit..."
+                class="w-full pl-9 pr-8 py-2 rounded-2xl bg-white border border-slate-200 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-[#5B6E2C]"
+              >
+              <button 
+                v-if="searchQuery" 
+                type="button"
+                @click="searchQuery = ''" 
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
+              >
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Responsive -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-200/80 shadow-inner">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-white text-[#5B6E2C] border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider">
+                <th class="py-3.5 px-4">No</th>
+                <th class="py-3.5 px-4">NIP</th>
+                <th class="py-3.5 px-4">Nama Lengkap</th>
+                <th class="py-3.5 px-4">Jabatan</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4">Tempat Tugas</th>
+                <th class="py-3.5 px-4">Kecamatan</th>
+                <th class="py-3.5 px-4 text-center">Jml Sertifikat</th>
+                <th class="py-3.5 px-4">Nomor HP</th>
+                <th class="py-3.5 px-4 text-center">Aksi Berkas</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs bg-white/70">
+              <tr v-if="isLoading">
+                <td colspan="10" class="py-14 text-center text-slate-500">
+                  <i class="fa-solid fa-circle-notch fa-spin text-2xl text-[#5B6E2C] mb-2 block"></i>
+                  Memuat data dari Google Spreadsheet...
+                </td>
+              </tr>
+              <tr v-else-if="filteredData.length === 0">
+                <td colspan="10" class="py-14 text-center text-slate-400">
+                  <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+                  Tidak ada data yang sesuai dengan filter pencarian.
+                </td>
+              </tr>
+              <tr v-else v-for="(item, index) in paginatedData" :key="item.id" class="hover:bg-[#5B6E2C]/5 transition">
+                <td class="py-3 px-4 font-bold text-slate-400">{{ (currentPage - 1) * rowsPerPage + index + 1 }}</td>
+                <td class="py-3 px-4 font-mono font-bold text-[#5B6E2C] whitespace-nowrap">{{ item.nip }}</td>
+                <td class="py-3 px-4 font-extrabold text-slate-800">{{ item.nama }}</td>
+                <td class="py-3 px-4 font-semibold text-slate-700">{{ item.jabatan }}</td>
+                <td class="py-3 px-4 whitespace-nowrap">
+                  <span 
+                    class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold"
+                    :class="item.statusPegawai === 'PNS' ? 'bg-[#5B6E2C]/15 text-[#5B6E2C]' : 'bg-[#FF5A22]/15 text-[#FF5A22]'"
+                  >
+                    {{ item.statusPegawai }}
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-slate-700 font-medium">{{ item.tempatTugas }}</td>
+                <td class="py-3 px-4 whitespace-nowrap">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    {{ item.kecamatan }}
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-center whitespace-nowrap">
+                  <span 
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-extrabold text-[10px]"
+                    :class="item.jumlahSertifikat > 1 ? 'bg-[#FF5A22]/15 text-[#FF5A22]' : 'bg-[#5B6E2C]/15 text-[#5B6E2C]'"
+                  >
+                    <i :class="item.jumlahSertifikat > 1 ? 'fa-solid fa-file-zipper' : 'fa-solid fa-file-lines'"></i>
+                    <span>{{ item.jumlahSertifikat }} ({{ item.jenisUpload }})</span>
+                  </span>
+                </td>
+                <td class="py-3 px-4 whitespace-nowrap">
+                  <a :href="'https://wa.me/' + formatWaNumber(item.noHp)" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold inline-flex items-center gap-1 text-[11px]">
+                    <i class="fa-brands fa-whatsapp text-emerald-600"></i> {{ item.noHp }}
+                  </a>
+                </td>
+                <td class="py-3 px-4 text-center whitespace-nowrap">
+                  <button 
+                    type="button"
+                    @click="openFilePreview(item)" 
+                    class="px-3 py-1 rounded-full text-[10px] font-extrabold text-white transition shadow-sm"
+                    :class="isArchiveItem(item) ? 'accent-btn' : 'primary-btn'"
+                  >
+                    <i :class="isArchiveItem(item) ? 'fa-solid fa-file-zipper mr-1' : 'fa-solid fa-eye mr-1'"></i>
+                    <span>{{ isArchiveItem(item) ? 'Buka Arsip' : 'Lihat' }}</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div v-if="filteredData.length > 0" class="pt-2 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div class="text-xs text-slate-500 font-semibold">
+            Menampilkan {{ Math.min((currentPage - 1) * rowsPerPage + 1, filteredData.length) }}-{{ Math.min(currentPage * rowsPerPage, filteredData.length) }} dari {{ filteredData.length }} pegawai
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button
+              type="button"
+              @click="currentPage = 1"
+              :disabled="currentPage === 1"
+              class="px-3 py-1 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 disabled:opacity-40 transition"
+            >
+              Awal
+            </button>
+            <button
+              type="button"
+              @click="currentPage = Math.max(1, currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="px-3 py-1 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 disabled:opacity-40 transition"
+            >
+              Prev
+            </button>
+
+            <span class="px-3 py-1 text-xs font-black text-[#5B6E2C]">
+              {{ currentPage }} / {{ totalPages }}
+            </span>
+
+            <button
+              type="button"
+              @click="currentPage = Math.min(totalPages, currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="px-3 py-1 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 disabled:opacity-40 transition"
+            >
+              Next
+            </button>
+            <button
+              type="button"
+              @click="currentPage = totalPages"
+              :disabled="currentPage === totalPages"
+              class="px-3 py-1 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 disabled:opacity-40 transition"
+            >
+              Akhir
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ==================== MODAL 1: DETAIL KECAMATAN (DAFTAR UNIT SEKOLAH) ==================== -->
+    <div v-if="showKecamatanDetailModal && selectedKecamatanDetail" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+      <div class="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl border border-white flex flex-col">
+        <!-- Header Modal Kecamatan -->
+        <div class="px-7 py-5 wavy-gradient-hero text-white flex items-center justify-between gap-3 shadow-md">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-map-location-dot text-lg text-emerald-200"></i>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase tracking-[0.2em] text-emerald-200 font-extrabold">Rincian Wilayah</span>
+              <h3 class="text-xl font-black text-white">Kecamatan {{ selectedKecamatanDetail.name }}</h3>
+            </div>
+          </div>
+          <button type="button" @click="closeKecamatanDetailModal" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-6 sm:p-7 overflow-y-auto space-y-6 flex-1 bg-[#F3F6F4]">
+          <!-- Metric Strip Kecamatan -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm relative overflow-hidden flex items-center justify-between">
+              <div class="relative z-10">
+                <span class="text-[10px] uppercase font-bold text-[#5B6E2C]">Pegawai Masuk</span>
+                <p class="text-3xl font-black text-slate-800 mt-1">{{ selectedKecamatanDetail.totalPegawai }}</p>
+              </div>
+              <!-- Background Icon Watermark Pegawai -->
+              <div class="absolute -right-2 -bottom-3 text-6xl text-[#5B6E2C]/10 pointer-events-none select-none">
+                <i class="fa-solid fa-users"></i>
+              </div>
+            </div>
+            <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm relative overflow-hidden flex items-center justify-between">
+              <div class="relative z-10">
+                <span class="text-[10px] uppercase font-bold text-[#FF5A22]">Dokumen Sertifikat</span>
+                <p class="text-3xl font-black text-[#FF5A22] mt-1">{{ selectedKecamatanDetail.totalSertifikat }}</p>
+              </div>
+              <!-- Background Icon Watermark Dokumen -->
+              <div class="absolute -right-2 -bottom-3 text-6xl text-[#FF5A22]/10 pointer-events-none select-none">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daftar Unit Sekolah (Bisa diklik untuk drill-down) -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="font-extrabold text-slate-800 text-sm">Unit Kerja & Sekolah di Kecamatan Ini</h4>
+              <span class="text-xs font-bold text-slate-400">Klik unit untuk melihat daftar pegawainya</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div 
+                v-for="unit in selectedKecamatanDetail.units" 
+                :key="unit.name"
+                @click="openSchoolDetail(unit, selectedKecamatanDetail.name)"
+                class="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-[#FF5A22] hover:shadow-md cursor-pointer transition flex items-center justify-between group"
+              >
+                <div class="min-w-0 pr-3">
+                  <div class="flex items-center gap-1.5 mb-1">
+                    <span 
+                      class="text-[9px] font-black px-2 py-0.5 rounded-full"
+                      :class="unit.type === 'Dinas' ? 'bg-emerald-100 text-emerald-800' : 'bg-[#5B6E2C]/10 text-[#5B6E2C]'"
+                    >
+                      {{ unit.type }}
+                    </span>
+                    <span class="text-[11px] font-bold text-slate-400">• {{ unit.count }} pegawai</span>
+                  </div>
+                  <h5 class="font-extrabold text-slate-800 text-xs sm:text-sm truncate group-hover:text-[#FF5A22] transition">
+                    {{ unit.name }}
+                  </h5>
+                  <p class="text-[11px] font-semibold text-slate-500 mt-0.5">
+                    {{ unit.certCount }} berkas sertifikat terkumpul
+                  </p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-[#F3F6F4] group-hover:bg-[#FF5A22] group-hover:text-white text-slate-400 flex items-center justify-center shrink-0 transition">
+                  <i class="fa-solid fa-chevron-right text-xs"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 2: DETAIL SEKOLAH (DRILL-DOWN PEGAWAI UNIT) ==================== -->
+    <div v-if="showSchoolModal && selectedSchoolDetail" class="fixed inset-0 z-[55] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+      <div class="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl border border-white flex flex-col">
+        <!-- Header Modal Sekolah -->
+        <div class="px-7 py-5 wavy-gradient-hero text-white flex items-center justify-between gap-3 shadow-md">
+          <div class="flex items-center gap-3 min-w-0">
+            <button 
+              type="button" 
+              @click="closeSchoolDetailModal" 
+              class="w-9 h-9 rounded-2xl bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition shrink-0"
+              title="Kembali ke rincian kecamatan"
+            >
+              <i class="fa-solid fa-arrow-left text-sm"></i>
+            </button>
+            <div class="truncate">
+              <span class="text-[10px] uppercase tracking-[0.2em] text-emerald-200 font-extrabold">Rincian Sekolah</span>
+              <h3 class="text-lg sm:text-xl font-black text-white truncate">{{ selectedSchoolDetail.name }}</h3>
+            </div>
+          </div>
+          <button type="button" @click="closeSchoolDetailModal" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Konten Pegawai Sekolah -->
+        <div class="p-6 sm:p-7 overflow-y-auto space-y-4 flex-1 bg-[#F3F6F4]">
+          <!-- Filter & Search Sekolah -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="relative w-full sm:w-72">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+              </span>
+              <input 
+                type="text" 
+                v-model="schoolEmployeeSearch" 
+                placeholder="Cari pegawai di sekolah ini..."
+                class="w-full pl-9 pr-8 py-2 rounded-2xl bg-white border border-slate-200 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-[#5B6E2C] outline-none shadow-sm"
+              >
+              <button 
+                v-if="schoolEmployeeSearch" 
+                type="button"
+                @click="schoolEmployeeSearch = ''" 
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
+              >
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+            </div>
+            <span class="text-xs font-bold text-slate-500 self-end sm:self-center">
+              Ditemukan {{ filteredSchoolEmployees.length }} pegawai
+            </span>
+          </div>
+
+          <!-- Tabel Pegawai Sekolah -->
+          <div class="fluid-glass rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-white text-[#5B6E2C] border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider">
+                    <th class="py-3.5 px-4">No</th>
+                    <th class="py-3.5 px-4">NIP</th>
+                    <th class="py-3.5 px-4">Nama Lengkap</th>
+                    <th class="py-3.5 px-4">Jabatan</th>
+                    <th class="py-3.5 px-4">Status</th>
+                    <th class="py-3.5 px-4 text-center">Sertifikat</th>
+                    <th class="py-3.5 px-4 text-center">Aksi</th>
+                    <th class="py-3.5 px-4">WhatsApp</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs bg-white/70">
+                  <tr v-if="filteredSchoolEmployees.length === 0">
+                    <td colspan="8" class="py-10 text-center text-slate-400">
+                      <i class="fa-solid fa-user-slash text-2xl mb-1.5 block"></i>
+                      Tidak ada pegawai yang sesuai dengan pencarian di unit ini.
+                    </td>
+                  </tr>
+                  <tr v-else v-for="(emp, idx) in paginatedSchoolEmployees" :key="emp.id" class="hover:bg-[#5B6E2C]/5 transition">
+                    <td class="py-3 px-4 font-bold text-slate-400">{{ (schoolCurrentPage - 1) * schoolRowsPerPage + idx + 1 }}</td>
+                    <td class="py-3 px-4 font-mono font-bold text-[#5B6E2C] whitespace-nowrap">{{ emp.nip }}</td>
+                    <td class="py-3 px-4 font-extrabold text-slate-800">{{ emp.nama }}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-700">{{ emp.jabatan }}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">
+                      <span 
+                        class="inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold"
+                        :class="emp.statusPegawai === 'PNS' ? 'bg-[#5B6E2C]/15 text-[#5B6E2C]' : 'bg-[#FF5A22]/15 text-[#FF5A22]'"
+                      >
+                        {{ emp.statusPegawai }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                      <span 
+                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-extrabold text-[10px]"
+                        :class="emp.jumlahSertifikat > 1 ? 'bg-[#FF5A22]/15 text-[#FF5A22]' : 'bg-[#5B6E2C]/15 text-[#5B6E2C]'"
+                      >
+                        {{ emp.jumlahSertifikat }} ({{ emp.jenisUpload }})
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                      <button 
+                        type="button"
+                        @click="openFilePreview(emp)" 
+                        class="px-3 py-1 rounded-full text-[10px] font-extrabold text-white transition shadow-sm"
+                        :class="isArchiveItem(emp) ? 'accent-btn' : 'primary-btn'"
+                      >
+                        <i :class="isArchiveItem(emp) ? 'fa-solid fa-file-zipper' : 'fa-solid fa-eye'"></i>
+                        <span>{{ isArchiveItem(emp) ? 'Arsip' : 'Lihat' }}</span>
+                      </button>
+                    </td>
+                    <td class="py-3 px-4 whitespace-nowrap">
+                      <a :href="'https://wa.me/' + formatWaNumber(emp.noHp)" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold inline-flex items-center gap-1 text-[11px]">
+                        <i class="fa-brands fa-whatsapp text-emerald-600"></i> {{ emp.noHp }}
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Khusus Sekolah -->
+            <div v-if="filteredSchoolEmployees.length > 0" class="px-5 py-3 bg-white border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2.5">
+              <span class="text-[11px] font-bold text-slate-400">
+                Halaman {{ schoolCurrentPage }} dari {{ schoolTotalPages }}
+              </span>
+              <div class="flex items-center gap-1">
+                <button 
+                  type="button" 
+                  @click="schoolCurrentPage = Math.max(1, schoolCurrentPage - 1)" 
+                  :disabled="schoolCurrentPage === 1" 
+                  class="px-2.5 py-1 rounded-full bg-[#F3F6F4] text-[10px] font-extrabold text-slate-700 disabled:opacity-40"
+                >
+                  Prev
+                </button>
+                <button 
+                  v-for="p in schoolTotalPages" 
+                  :key="p" 
+                  type="button"
+                  @click="schoolCurrentPage = p" 
+                  :class="schoolCurrentPage === p ? 'bg-[#5B6E2C] text-white' : 'bg-[#F3F6F4] text-slate-600'" 
+                  class="w-6 h-6 rounded-full text-[10px] font-extrabold transition"
+                >
+                  {{ p }}
+                </button>
+                <button 
+                  type="button" 
+                  @click="schoolCurrentPage = Math.min(schoolTotalPages, schoolCurrentPage + 1)" 
+                  :disabled="schoolCurrentPage === schoolTotalPages" 
+                  class="px-2.5 py-1 rounded-full bg-[#F3F6F4] text-[10px] font-extrabold text-slate-700 disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 3: RINCIAN PEGAWAI BERDASARKAN JABATAN ==================== -->
+    <div v-if="showJabatanModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+      <div class="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl border border-white flex flex-col">
+        <!-- Header Modal Jabatan -->
+        <div class="px-7 py-5 wavy-gradient-hero text-white flex items-center justify-between gap-3 shadow-md">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-briefcase text-lg text-[#FF5A22]"></i>
+            </div>
+            <div class="truncate">
+              <span class="text-[10px] uppercase tracking-[0.2em] text-emerald-200 font-extrabold">Klasifikasi Pegawai</span>
+              <h3 class="text-lg sm:text-xl font-extrabold text-white truncate">
+                {{ selectedJabatanFilter ? 'Jabatan: ' + selectedJabatanFilter : 'Rincian Jabatan Pegawai' }}
+              </h3>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button 
+              type="button" 
+              @click="exportJabatanExcel" 
+              :disabled="filteredJabatanEmployees.length === 0" 
+              class="px-3.5 py-1.5 rounded-xl accent-btn text-white text-xs font-black transition flex items-center gap-1.5 shadow disabled:opacity-40"
+              title="Cetak data pegawai jabatan ini ke Excel"
+            >
+              <i class="fa-solid fa-file-excel"></i>
+              <span class="hidden sm:inline">Cetak Excel Jabatan</span>
+            </button>
+            <button type="button" @click="closeJabatanModal" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Konten Modal Jabatan -->
+        <div class="p-6 sm:p-7 overflow-y-auto space-y-5 flex-1 bg-[#F3F6F4]">
+          <!-- Pilihan Tab / Pill Jabatan yang Ada (Dengan Horizontal Scrolling bertema) -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-layer-group text-[#5B6E2C]"></i>
+                Pilih Kategori Jabatan ({{ jabatanListSummary.length }} Kategori):
+              </span>
+              <span 
+                v-if="selectedJabatanFilter" 
+                @click="selectedJabatanFilter = ''" 
+                class="text-[11px] font-bold text-[#FF5A22] cursor-pointer hover:underline flex items-center gap-1"
+              >
+                <i class="fa-solid fa-rotate-left text-[10px]"></i> Tampilkan Semua
+              </span>
+            </div>
+
+            <!-- Scroll Container Horizontal dengan tema -->
+            <div class="relative">
+              <div 
+                ref="jabatanScrollContainer"
+                class="flex items-center gap-2 overflow-x-auto pb-2.5 pt-1 scrollbar-theme-h scroll-smooth"
+              >
+                <button
+                  type="button"
+                  @click="selectedJabatanFilter = ''"
+                  :class="selectedJabatanFilter === '' ? 'bg-[#5B6E2C] text-white shadow-md' : 'bg-[#F3F6F4] text-slate-700 hover:bg-slate-200 border border-slate-200/60'"
+                  class="px-3.5 py-1.5 rounded-full text-[11px] font-extrabold transition flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                >
+                  <span>Semua</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded-full" :class="selectedJabatanFilter === '' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-700'">
+                    {{ items.length }}
+                  </span>
+                </button>
+                <button
+                  v-for="jb in jabatanListSummary"
+                  :key="jb.name"
+                  type="button"
+                  @click="selectedJabatanFilter = jb.name"
+                  :class="selectedJabatanFilter === jb.name ? 'bg-[#FF5A22] text-white shadow-md' : 'bg-[#F3F6F4] text-slate-700 hover:bg-slate-200 border border-slate-200/60'"
+                  class="px-3.5 py-1.5 rounded-full text-[11px] font-extrabold transition flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                >
+                  <span>{{ jb.name }}</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded-full" :class="selectedJabatanFilter === jb.name ? 'bg-white/30 text-white' : 'bg-slate-200 text-slate-700'">
+                    {{ jb.count }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter & Search Pegawai Jabatan -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="relative w-full sm:w-72">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+              </span>
+              <input 
+                type="text" 
+                v-model="jabatanEmployeeSearch" 
+                placeholder="Cari NIP, nama, sekolah..."
+                class="w-full pl-9 pr-8 py-2 rounded-2xl bg-white border border-slate-200 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-[#5B6E2C] outline-none shadow-sm"
+              >
+              <button 
+                v-if="jabatanEmployeeSearch" 
+                type="button"
+                @click="jabatanEmployeeSearch = ''" 
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
+              >
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+            </div>
+            <div class="flex items-center gap-2.5 self-end sm:self-center">
+              <span class="text-xs font-bold text-slate-500">
+                Ditemukan {{ filteredJabatanEmployees.length }} pegawai
+              </span>
+              <button 
+                type="button" 
+                @click="exportJabatanExcel" 
+                :disabled="filteredJabatanEmployees.length === 0" 
+                class="sm:hidden px-3 py-1.5 rounded-xl accent-btn text-white text-[11px] font-bold flex items-center gap-1 disabled:opacity-40"
+              >
+                <i class="fa-solid fa-file-excel"></i> Cetak Excel
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabel Pegawai Berdasarkan Jabatan -->
+          <div class="fluid-glass rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-white text-[#5B6E2C] border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider">
+                    <th class="py-3.5 px-4">No</th>
+                    <th class="py-3.5 px-4">NIP</th>
+                    <th class="py-3.5 px-4">Nama Lengkap</th>
+                    <th class="py-3.5 px-4">Jabatan</th>
+                    <th class="py-3.5 px-4">Status</th>
+                    <th class="py-3.5 px-4">Tempat Tugas</th>
+                    <th class="py-3.5 px-4 text-center">Sertifikat</th>
+                    <th class="py-3.5 px-4 text-center">Aksi</th>
+                    <th class="py-3.5 px-4">WhatsApp</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs bg-white/70">
+                  <tr v-if="filteredJabatanEmployees.length === 0">
+                    <td colspan="9" class="py-10 text-center text-slate-400">
+                      <i class="fa-solid fa-user-slash text-2xl mb-1.5 block"></i>
+                      Tidak ada pegawai yang sesuai dengan filter jabatan/pencarian.
+                    </td>
+                  </tr>
+                  <tr v-else v-for="(emp, idx) in paginatedJabatanEmployees" :key="emp.id" class="hover:bg-[#5B6E2C]/5 transition">
+                    <td class="py-3 px-4 font-bold text-slate-400">{{ (jabatanCurrentPage - 1) * jabatanRowsPerPage + idx + 1 }}</td>
+                    <td class="py-3 px-4 font-mono font-bold text-[#5B6E2C] whitespace-nowrap">{{ emp.nip }}</td>
+                    <td class="py-3 px-4 font-extrabold text-slate-800">{{ emp.nama }}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-700">{{ emp.jabatan }}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">
+                      <span 
+                        class="inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold"
+                        :class="emp.statusPegawai === 'PNS' ? 'bg-[#5B6E2C]/15 text-[#5B6E2C]' : 'bg-[#FF5A22]/15 text-[#FF5A22]'"
+                      >
+                        {{ emp.statusPegawai }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-slate-700">{{ emp.tempatTugas }} ({{ emp.kecamatan }})</td>
+                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                      <span 
+                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-extrabold text-[10px]"
+                        :class="emp.jumlahSertifikat > 1 ? 'bg-[#FF5A22]/15 text-[#FF5A22]' : 'bg-[#5B6E2C]/15 text-[#5B6E2C]'"
+                      >
+                        {{ emp.jumlahSertifikat }} ({{ emp.jenisUpload }})
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                      <button 
+                        type="button"
+                        @click="openFilePreview(emp)" 
+                        class="px-3 py-1 rounded-full text-[10px] font-extrabold text-white transition shadow-sm"
+                        :class="isArchiveItem(emp) ? 'accent-btn' : 'primary-btn'"
+                      >
+                        <i :class="isArchiveItem(emp) ? 'fa-solid fa-file-zipper' : 'fa-solid fa-eye'"></i>
+                        <span>{{ isArchiveItem(emp) ? 'Arsip' : 'Lihat' }}</span>
+                      </button>
+                    </td>
+                    <td class="py-3 px-4 whitespace-nowrap">
+                      <a :href="'https://wa.me/' + formatWaNumber(emp.noHp)" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold inline-flex items-center gap-1 text-[11px]">
+                        <i class="fa-brands fa-whatsapp text-emerald-600"></i> {{ emp.noHp }}
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Khusus Jabatan -->
+            <div v-if="filteredJabatanEmployees.length > 0" class="px-5 py-3 bg-white border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2.5">
+              <span class="text-[11px] font-bold text-slate-400">
+                Halaman {{ jabatanCurrentPage }} dari {{ jabatanTotalPages }}
+              </span>
+              <div class="flex items-center gap-1">
+                <button 
+                  type="button" 
+                  @click="jabatanCurrentPage = Math.max(1, jabatanCurrentPage - 1)" 
+                  :disabled="jabatanCurrentPage === 1" 
+                  class="px-2.5 py-1 rounded-full bg-[#F3F6F4] text-[10px] font-extrabold text-slate-700 disabled:opacity-40"
+                >
+                  Prev
+                </button>
+                <button 
+                  v-for="p in jabatanTotalPages" 
+                  :key="p" 
+                  type="button"
+                  @click="jabatanCurrentPage = p" 
+                  :class="jabatanCurrentPage === p ? 'bg-[#5B6E2C] text-white' : 'bg-[#F3F6F4] text-slate-600'" 
+                  class="w-6 h-6 rounded-full text-[10px] font-extrabold transition"
+                >
+                  {{ p }}
+                </button>
+                <button 
+                  type="button" 
+                  @click="jabatanCurrentPage = Math.min(jabatanTotalPages, jabatanCurrentPage + 1)" 
+                  :disabled="jabatanCurrentPage === jabatanTotalPages" 
+                  class="px-2.5 py-1 rounded-full bg-[#F3F6F4] text-[10px] font-extrabold text-slate-700 disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 4: FULLSCREEN PREVIEW VIEWER ==================== -->
+    <div v-if="showFileModal && previewItem" class="fixed inset-0 z-[70] flex flex-col bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-700 shadow-md">
+        <div class="flex items-center gap-3 min-w-0">
+          <button 
+            type="button" 
+            @click="closePreviewModal" 
+            class="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 border border-white/10 transition"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+          </button>
+          <div class="truncate">
+            <h4 class="text-sm font-black text-white truncate">{{ previewItem.nama }} — {{ previewItem.tempatTugas }}</h4>
+            <p class="text-xs text-slate-400 truncate">NIP: {{ previewItem.nip }} | {{ previewFileName }}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a 
+            :href="previewFileUrl" 
+            target="_blank" 
+            class="accent-btn text-white font-extrabold px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 shadow"
+          >
+            <i class="fa-solid fa-download"></i> Unduh Asli
+          </a>
+          <button 
+            type="button" 
+            @click="closePreviewModal" 
+            class="text-slate-400 hover:text-white p-2 rounded-xl transition"
+          >
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 w-full bg-slate-200 relative overflow-hidden flex flex-col">
+        <!-- PDF / Document Preview -->
+        <iframe 
+          v-if="!previewIsArchive && isGoogleDriveFile(previewFileUrl)" 
+          :src="previewFrameUrl" 
+          class="w-full h-full border-0 bg-white" 
+          allow="autoplay"
+          title="Preview Dokumen"
+        ></iframe>
+
+        <!-- ZIP/RAR Detected Screen -->
+        <div v-else-if="previewIsArchive" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <div class="max-w-md w-full bg-white p-8 rounded-[2.5rem] border border-amber-200 shadow-xl">
+            <div class="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-100 text-[#FF5A22] shadow-sm">
+              <i class="fa-solid fa-file-zipper text-4xl"></i>
+            </div>
+            <h5 class="text-lg font-black text-slate-800">Berkas Arsip ({{ previewFileType.toUpperCase() }})</h5>
+            <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+              Pegawai ini mengunggah <strong>{{ previewItem.jumlahSertifikat }} dokumen sertifikat</strong> dalam format arsip terkompresi. Silakan unduh atau buka langsung berkas Google Drive untuk mengekstrak isi berkas.
+            </p>
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <a :href="previewFileUrl" target="_blank" class="inline-flex items-center gap-2 rounded-2xl primary-btn px-5 py-2.5 text-xs font-extrabold text-white shadow">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka di Drive
+              </a>
+              <button 
+                type="button"
+                @click="closePreviewModal" 
+                class="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Non-Drive Fallback -->
+        <div v-else class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <div class="max-w-md w-full bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl">
+            <div class="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-[#5B6E2C]/10 text-[#5B6E2C] shadow-sm">
+              <i class="fa-solid fa-file text-4xl"></i>
+            </div>
+            <h5 class="text-lg font-black text-slate-800">Pratinjau Tidak Tersedia Langsung</h5>
+            <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+              Format berkas ini tidak dapat disematkan langsung di dalam frame. Silakan akses berkas melalui tombol di bawah.
+            </p>
+            <div class="mt-6 flex items-center justify-center gap-3">
+              <a :href="previewFileUrl" target="_blank" class="inline-flex items-center gap-2 rounded-2xl primary-btn px-5 py-2.5 text-xs font-extrabold text-white shadow">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Berkas
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 5: ATUR TARGET SASARAN ==================== -->
+    <div v-if="showTargetModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div class="bg-white rounded-[2.5rem] max-w-md w-full p-7 shadow-2xl border border-white">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <span class="text-[10px] uppercase tracking-wider text-[#5B6E2C] font-extrabold">Konfigurasi</span>
+            <h3 class="font-black text-lg text-slate-800">Target Pegawai Per Kecamatan</h3>
+          </div>
+          <button type="button" @click="showTargetModal = false" class="text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+        <p class="text-xs text-slate-500 mb-5 leading-relaxed">
+          Masukkan estimasi target sasaran di setiap kecamatan untuk menghitung persentase progress bar secara akurat.
+        </p>
+        
+        <div class="space-y-3">
+          <div v-for="kec in kecamatanList" :key="kec" class="flex items-center justify-between p-2 rounded-2xl bg-[#F3F6F4]">
+            <label class="text-xs font-extrabold text-slate-700 pl-2">Kecamatan {{ kec }}</label>
+            <input 
+              type="number" 
+              v-model.number="targets[kec]" 
+              min="1"
+              class="w-28 px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-black text-right focus:ring-2 focus:ring-[#5B6E2C] outline-none bg-white"
+            >
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-2.5">
+          <button 
+            type="button" 
+            @click="showTargetModal = false" 
+            class="px-4 py-2 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100"
+          >
+            Tutup
+          </button>
+          <button 
+            type="button" 
+            @click="saveTargets" 
+            class="px-5 py-2 rounded-2xl text-xs font-extrabold primary-btn text-white shadow-sm"
+          >
+            Simpan Target
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 6: PILIHAN FILTER EXPORT EXCEL ==================== -->
+    <div v-if="showExportModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[65] flex items-center justify-center p-4 animate-fade-in">
+      <div class="bg-white rounded-[2.5rem] max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-white flex flex-col max-h-[90vh]">
+        
+        <!-- Header Modal Export -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-[#FF5A22]/10 text-[#FF5A22] flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-file-excel text-lg"></i>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-[#5B6E2C] font-extrabold">Opsi Cetak Dokumen</span>
+              <h3 class="font-black text-lg text-slate-800">Export Laporan Excel</h3>
+            </div>
+          </div>
+          <button type="button" @click="showExportModal = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+
+        <div class="overflow-y-auto space-y-5 flex-1 pr-1">
+          <!-- 1. Pilihan Kecamatan -->
+          <div class="bg-[#F3F6F4] p-4 rounded-2xl border border-slate-200/80">
+            <div class="flex items-center justify-between mb-3">
+              <label class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-map-pin text-[#5B6E2C]"></i> Pilih Kecamatan:
+              </label>
+              <button 
+                type="button" 
+                @click="toggleAllExportKecamatan" 
+                class="text-[11px] font-bold text-[#FF5A22] hover:underline"
+              >
+                {{ exportFilter.kecamatan.length === kecamatanList.length ? 'Batal Pilih Semua' : 'Pilih Semua' }}
+              </button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <label 
+                v-for="kec in kecamatanList" 
+                :key="kec" 
+                class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer transition select-none hover:border-[#5B6E2C]"
+                :class="exportFilter.kecamatan.includes(kec) ? 'border-[#5B6E2C] bg-[#5B6E2C]/5 font-bold text-[#5B6E2C]' : 'text-slate-600'"
+              >
+                <input 
+                  type="checkbox" 
+                  :value="kec" 
+                  v-model="exportFilter.kecamatan" 
+                  class="rounded text-[#5B6E2C] focus:ring-[#5B6E2C] w-4 h-4 cursor-pointer"
+                >
+                <span class="text-xs">{{ kec }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 2. Pilihan Status Kepegawaian -->
+          <div class="bg-[#F3F6F4] p-4 rounded-2xl border border-slate-200/80">
+            <div class="flex items-center justify-between mb-3">
+              <label class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-id-badge text-[#5B6E2C]"></i> Pilih Status Pegawai:
+              </label>
+              <button 
+                type="button" 
+                @click="toggleAllExportStatus" 
+                class="text-[11px] font-bold text-[#FF5A22] hover:underline"
+              >
+                {{ exportFilter.status.length === exportStatusOptions.length ? 'Batal Pilih Semua' : 'Pilih Semua' }}
+              </button>
+            </div>
+            <div class="space-y-2">
+              <label 
+                v-for="st in exportStatusOptions" 
+                :key="st" 
+                class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer transition select-none hover:border-[#FF5A22]"
+                :class="exportFilter.status.includes(st) ? 'border-[#FF5A22] bg-[#FF5A22]/5 font-bold text-slate-800' : 'text-slate-600'"
+              >
+                <div class="flex items-center gap-2.5">
+                  <input 
+                    type="checkbox" 
+                    :value="st" 
+                    v-model="exportFilter.status" 
+                    class="rounded text-[#FF5A22] focus:ring-[#FF5A22] w-4 h-4 cursor-pointer"
+                  >
+                  <span class="text-xs">{{ st }}</span>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-extrabold bg-slate-100 text-slate-600">
+                  {{ countExportByStatus(st) }} data
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Ringkasan Hasil Data yang akan diexport -->
+          <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-xs text-emerald-800">
+              <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+              <span>Total data siap diexport:</span>
+            </div>
+            <span class="text-sm font-black text-emerald-800">
+              {{ previewExportCount }} Pegawai
+            </span>
+          </div>
+        </div>
+
+        <!-- Footer Tombol Aksi -->
+        <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <button 
+            type="button" 
+            @click="showExportModal = false" 
+            class="px-4 py-2 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
+          >
+            Batal
+          </button>
+          <button 
+            type="button" 
+            @click="executeExportExcel" 
+            :disabled="previewExportCount === 0" 
+            class="px-5 py-2.5 rounded-2xl text-xs font-black text-white accent-btn shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <i class="fa-solid fa-download"></i>
+            <span>Unduh File Excel (.xlsx)</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+          SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw6n6OAFnY9h-XTQOXXfMZA-ppvsyzCt0jXopNoABmwigBk2AJdLiTaXVOWIc1dn0BBZg/exec',
+          kecamatanList: ['Melaya', 'Negara', 'Jembrana', 'Mendoyo', 'Pekutatan'],
+          statusList: ['PNS', 'PPPK', 'PPPK Paruh Waktu', 'Honorer / Non-ASN'],
+          exportStatusOptions: ['PNS', 'PPPK', 'PPPK Paruh Waktu'],
+          items: [],
+          isLoading: false,
+          autoRefreshTimer: null,
+          autoRefreshCountdown: 10,
+          selectedKecamatan: '',
+          selectedStatus: '',
+          searchQuery: '',
+          currentPage: 1,
+          rowsPerPage: 10,
+          showTargetModal: false,
+
+          // State Modal Export Excel
+          showExportModal: false,
+          exportFilter: {
+            kecamatan: ['Melaya', 'Negara', 'Jembrana', 'Mendoyo', 'Pekutatan'],
+            status: ['PNS', 'PPPK', 'PPPK Paruh Waktu']
+          },
+
+          // State Modal Detail Kecamatan
+          showKecamatanDetailModal: false,
+          selectedKecamatanDetail: null,
+
+          // State Drill-Down Detail Sekolah
+          showSchoolModal: false,
+          selectedSchoolDetail: null,
+          schoolEmployeeSearch: '',
+          schoolCurrentPage: 1,
+          schoolRowsPerPage: 5,
+
+          // State Modal Jabatan
+          showJabatanModal: false,
+          selectedJabatanFilter: '',
+          jabatanEmployeeSearch: '',
+          jabatanCurrentPage: 1,
+          jabatanRowsPerPage: 7,
+
+          // State Modal Preview File
+          showFileModal: false,
+          previewItem: null,
+          previewFileUrl: '',
+          previewFileName: 'File Sertifikat',
+          previewFileType: 'unknown',
+
+          // Mode toggle persentase progress bar: 'pegawai' atau 'sertifikat'
+          progressCalculationMode: 'pegawai',
+          targets: {
+            'Melaya': 100,
+            'Negara': 150,
+            'Jembrana': 150,
+            'Mendoyo': 120,
+            'Pekutatan': 80
+          }
+        }
+      },
+      computed: {
+        previewIsArchive() {
+          return ['zip', 'rar', '7z'].includes(this.previewFileType);
+        },
+        previewFrameUrl() {
+          if (!this.previewFileUrl) return '';
+          const drivePreview = this.getPreviewUrl(this.previewFileUrl);
+          if (drivePreview && drivePreview.includes('/file/d/')) {
+            return drivePreview;
+          }
+          return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(this.previewFileUrl)}`;
+        },
+        totalTarget() {
+          return Object.values(this.targets).reduce((a, b) => a + (Number(b) || 0), 0);
+        },
+        overallPercentage() {
+          if (!this.totalTarget) return 0;
+          return Math.round((this.items.length / this.totalTarget) * 100);
+        },
+        totalCertificates() {
+          return this.items.reduce((sum, item) => sum + (Number(item.jumlahSertifikat) || 1), 0);
+        },
+        averageCertificates() {
+          if (this.items.length === 0) return 0;
+          return (this.totalCertificates / this.items.length).toFixed(1);
+        },
+        kecamatanStats() {
+          return this.kecamatanList.map(kec => {
+            const dataKec = this.items.filter(i => i.kecamatan === kec);
+            const count = dataKec.length;
+            const certCount = dataKec.reduce((sum, i) => sum + (Number(i.jumlahSertifikat) || 1), 0);
+            const target = this.targets[kec] || 100;
+            
+            const percentage = this.progressCalculationMode === 'pegawai'
+              ? (target > 0 ? Math.round((count / target) * 100) : 0)
+              : (target > 0 ? Math.round((certCount / target) * 100) : 0);
+
+            const units = new Set(dataKec.map(i => (i.tempatTugas || '').trim().toUpperCase()));
+            return {
+              name: kec,
+              count,
+              certCount,
+              target,
+              percentage,
+              unitCount: units.size
+            };
+          });
+        },
+        topKecamatan() {
+          if (this.items.length === 0) return { name: '-', count: 0, certCount: 0 };
+          const sorted = [...this.kecamatanStats].sort((a, b) => b.count - a.count || b.certCount - a.certCount);
+          return sorted[0];
+        },
+        uniqueTempatTugasCount() {
+          const units = new Set(this.items.map(i => (i.tempatTugas || '').trim().toUpperCase()));
+          return units.size;
+        },
+        filteredData() {
+          return this.items.filter(item => {
+            const matchKec = this.selectedKecamatan === '' || item.kecamatan === this.selectedKecamatan;
+            const matchStatus = this.selectedStatus === '' || item.statusPegawai === this.selectedStatus;
+            const q = this.searchQuery.toLowerCase();
+            const matchQuery = !q || 
+              String(item.nip).toLowerCase().includes(q) ||
+              (item.nama && item.nama.toLowerCase().includes(q)) ||
+              (item.jabatan && item.jabatan.toLowerCase().includes(q)) ||
+              (item.statusPegawai && item.statusPegawai.toLowerCase().includes(q)) ||
+              (item.tempatTugas && item.tempatTugas.toLowerCase().includes(q));
+            return matchKec && matchStatus && matchQuery;
+          });
+        },
+        filteredCertificateCount() {
+          return this.filteredData.reduce((sum, item) => sum + (Number(item.jumlahSertifikat) || 1), 0);
+        },
+        previewExportCount() {
+          return this.getExportTargetData().length;
+        },
+        totalPages() {
+          return Math.max(1, Math.ceil(this.filteredData.length / this.rowsPerPage));
+        },
+        paginatedData() {
+          const start = (this.currentPage - 1) * this.rowsPerPage;
+          return this.filteredData.slice(start, start + this.rowsPerPage);
+        },
+
+        // Komputasi Pegawai di Modal Detail Sekolah
+        filteredSchoolEmployees() {
+          if (!this.selectedSchoolDetail) return [];
+          const q = this.schoolEmployeeSearch.trim().toLowerCase();
+          return this.items.filter(item => {
+            const matchSchool = (item.tempatTugas || '').trim() === this.selectedSchoolDetail.name;
+            const matchQuery = !q ||
+              String(item.nip || '').toLowerCase().includes(q) ||
+              String(item.nama || '').toLowerCase().includes(q) ||
+              String(item.jabatan || '').toLowerCase().includes(q) ||
+              String(item.statusPegawai || '').toLowerCase().includes(q);
+            return matchSchool && matchQuery;
+          });
+        },
+        schoolTotalPages() {
+          return Math.max(1, Math.ceil(this.filteredSchoolEmployees.length / this.schoolRowsPerPage));
+        },
+        paginatedSchoolEmployees() {
+          const start = (this.schoolCurrentPage - 1) * this.schoolRowsPerPage;
+          return this.filteredSchoolEmployees.slice(start, start + this.schoolRowsPerPage);
+        },
+
+        // Komputasi Pegawai di Modal Rincian Jabatan
+        jabatanListSummary() {
+          const map = {};
+
+          // Ambil jabatan dari data yang sudah terkumpul
+          this.items.forEach(item => {
+            const jb = (item.jabatan || 'Lainnya').trim();
+            if (!map[jb]) {
+              map[jb] = { name: jb, count: 0 };
+            }
+            map[jb].count++;
+          });
+
+          // Urutkan: yang sudah memiliki pengumpul di depan, lalu urutkan berdasarkan jumlah terbanyak
+          return Object.values(map).sort((a, b) => b.count - a.count);
+        },
+        filteredJabatanEmployees() {
+          const q = this.jabatanEmployeeSearch.trim().toLowerCase();
+          return this.items.filter(item => {
+            const matchJabatan = !this.selectedJabatanFilter || (item.jabatan || '').trim() === this.selectedJabatanFilter;
+            const matchQuery = !q ||
+              String(item.nip || '').toLowerCase().includes(q) ||
+              String(item.nama || '').toLowerCase().includes(q) ||
+              String(item.tempatTugas || '').toLowerCase().includes(q) ||
+              String(item.kecamatan || '').toLowerCase().includes(q) ||
+              String(item.statusPegawai || '').toLowerCase().includes(q);
+            return matchJabatan && matchQuery;
+          });
+        },
+        jabatanTotalPages() {
+          return Math.max(1, Math.ceil(this.filteredJabatanEmployees.length / this.jabatanRowsPerPage));
+        },
+        paginatedJabatanEmployees() {
+          const start = (this.jabatanCurrentPage - 1) * this.jabatanRowsPerPage;
+          return this.filteredJabatanEmployees.slice(start, start + this.jabatanRowsPerPage);
+        }
+      },
+      watch: {
+        selectedStatus() { this.currentPage = 1; },
+        selectedKecamatan() { this.currentPage = 1; },
+        searchQuery() { this.currentPage = 1; },
+        schoolEmployeeSearch() { this.schoolCurrentPage = 1; },
+        selectedJabatanFilter() { this.jabatanCurrentPage = 1; },
+        jabatanEmployeeSearch() { this.jabatanCurrentPage = 1; },
+        filteredData: {
+          immediate: true,
+          handler() {
+            if (this.currentPage > this.totalPages) {
+              this.currentPage = this.totalPages;
+            }
+          }
+        }
+      },
+      mounted() {
+        const savedTargets = localStorage.getItem('sertifikat_targets');
+        if (savedTargets) {
+          try {
+            this.targets = JSON.parse(savedTargets);
+          } catch (e) {
+            console.warn('Gagal membaca saved targets:', e);
+          }
+        }
+        this.fetchData();
+        this.startAutoRefresh();
+      },
+      beforeUnmount() {
+        this.stopAutoRefresh();
+      },
+      methods: {
+        startAutoRefresh() {
+          this.stopAutoRefresh();
+          this.autoRefreshCountdown = 10;
+          this.autoRefreshTimer = setInterval(() => {
+            if (this.autoRefreshCountdown > 1) {
+              this.autoRefreshCountdown--;
+            } else {
+              this.autoRefreshCountdown = 10;
+              // Lakukan fetch data secara background jika tidak sedang fetching
+              if (!this.isLoading) {
+                this.fetchData(true);
+              }
+            }
+          }, 1000);
+        },
+        stopAutoRefresh() {
+          if (this.autoRefreshTimer) {
+            clearInterval(this.autoRefreshTimer);
+            this.autoRefreshTimer = null;
+          }
+        },
+        manualRefresh() {
+          this.fetchData();
+          this.startAutoRefresh(); // Reset ulang hitungan 10 detik saat diklik manual
+        },
+        countByStatus(st) {
+          return this.items.filter(item => (item.statusPegawai || '').trim() === st).length;
+        },
+        countExportByStatus(st) {
+          return this.items.filter(item => {
+            const matchKec = this.exportFilter.kecamatan.includes(item.kecamatan);
+            const matchStatus = (item.statusPegawai || '').trim() === st;
+            return matchKec && matchStatus;
+          }).length;
+        },
+        handleStatusClick(status) {
+          this.selectedStatus = this.selectedStatus === status ? '' : status;
+          this.currentPage = 1;
+          
+          // Scroll halus menuju tabel agar admin langsung melihat hasil filter
+          this.$nextTick(() => {
+            const tableEl = document.getElementById('tabel-pengumpul');
+            if (tableEl) {
+              tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          });
+        },
+        getPreviewUrl(url) {
+          if (!url) return '';
+          const value = String(url).trim();
+          const match = value.match(/\/d\/([a-zA-Z0-9_-]+)/) || value.match(/id=([a-zA-Z0-9_-]+)/);
+          if (match && match[1]) {
+            return `https://drive.google.com/file/d/${match[1]}/preview`;
+          }
+          return value;
+        },
+        isGoogleDriveFile(fileUrl) {
+          if (!fileUrl) return false;
+          return /drive\.google\.com/i.test(String(fileUrl));
+        },
+        isArchiveItem(item) {
+          if (!item) return false;
+          const type = (item.jenisUpload || '').toLowerCase();
+          const name = (item.fileName || '').toLowerCase();
+          return type.includes('archive') || type.includes('zip') || type.includes('rar') || /\.(zip|rar|7z)$/i.test(name);
+        },
+        detectFileType(item) {
+          if (!item) return 'unknown';
+          const fileName = (item.fileName || '').toLowerCase();
+          if (fileName.endsWith('.pdf')) return 'pdf';
+          if (fileName.endsWith('.zip')) return 'zip';
+          if (fileName.endsWith('.rar')) return 'rar';
+          if (fileName.endsWith('.7z')) return '7z';
+          if (this.isArchiveItem(item)) return 'zip';
+          return 'pdf';
+        },
+        openFilePreview(item) {
+          if (!item || !item.fileUrl) return;
+          this.previewItem = item;
+          this.previewFileUrl = item.fileUrl;
+          this.previewFileName = item.fileName || item.nama || 'File Sertifikat';
+          this.previewFileType = this.detectFileType(item);
+          this.showFileModal = true;
+        },
+        closePreviewModal() {
+          this.showFileModal = false;
+          this.previewItem = null;
+        },
+        async fetchData(isBackground = false) {
+          if (this.SCRIPT_URL.includes('MASUKKAN_URL')) {
+            return;
+          }
+          if (!isBackground) {
+            this.isLoading = true;
+          }
+          try {
+            const res = await fetch(this.SCRIPT_URL);
+            const result = await res.json();
+            if (result.status === 'success') {
+              this.items = (result.data || []).map(item => {
+                const isArchive = this.isArchiveItem(item);
+                let count = parseInt(item.jumlahSertifikat, 10);
+
+                if (isNaN(count) || count <= 0) {
+                  if (isArchive) {
+                    const match = String(item.fileName).match(/_(\d+)Sertifikat_/i);
+                    count = match ? parseInt(match[1], 10) : 2;
+                  } else {
+                    count = 1;
+                  }
+                }
+
+                return {
+                  ...item,
+                  jenisUpload: item.jenisUpload || (isArchive ? 'Arsip ZIP/RAR' : 'Satuan'),
+                  jumlahSertifikat: count
+                };
+              });
+            }
+          } catch (error) {
+            console.error('Gagal mengambil data:', error);
+          } finally {
+            this.isLoading = false;
+          }
+        },
+
+        // Modal Kecamatan
+        openKecamatanDetail(stat) {
+          this.selectedKecamatan = stat.name;
+          const kecamatanItems = this.items.filter(item => item.kecamatan === stat.name);
+          const grouped = {};
+
+          kecamatanItems.forEach(item => {
+            const name = (item.tempatTugas || 'Tidak Diketahui').trim();
+            if (!grouped[name]) {
+              grouped[name] = {
+                name,
+                count: 0,
+                certCount: 0,
+                type: /dinas/i.test(name) ? 'Dinas' : 'Sekolah',
+                percentage: 0
+              };
+            }
+            grouped[name].count += 1;
+            grouped[name].certCount += Number(item.jumlahSertifikat) || 1;
+          });
+
+          const units = Object.values(grouped)
+            .map(unit => ({
+              ...unit,
+              percentage: Math.min(100, Math.round((unit.count / Math.max(1, stat.target || unit.count)) * 100))
+            }))
+            .sort((a, b) => b.count - a.count || b.certCount - a.certCount);
+
+          this.selectedKecamatanDetail = {
+            name: stat.name,
+            target: this.targets[stat.name] || 0,
+            totalPegawai: kecamatanItems.length,
+            totalSertifikat: kecamatanItems.reduce((sum, item) => sum + (Number(item.jumlahSertifikat) || 1), 0),
+            percentage: stat.percentage,
+            units
+          };
+          this.showKecamatanDetailModal = true;
+        },
+        closeKecamatanDetailModal() {
+          this.showKecamatanDetailModal = false;
+          this.selectedKecamatanDetail = null;
+        },
+
+        // Modal Drill-down Sekolah
+        openSchoolDetail(unit, kecamatanName) {
+          this.selectedSchoolDetail = {
+            ...unit,
+            kecamatan: kecamatanName
+          };
+          this.schoolEmployeeSearch = '';
+          this.schoolCurrentPage = 1;
+          this.showSchoolModal = true;
+        },
+        closeSchoolDetailModal() {
+          this.showSchoolModal = false;
+          this.selectedSchoolDetail = null;
+        },
+
+        // Modal Jabatan
+        openJabatanModal(statusPreset = null) {
+          this.selectedJabatanFilter = '';
+          this.jabatanEmployeeSearch = '';
+          this.jabatanCurrentPage = 1;
+          this.showJabatanModal = true;
+        },
+        closeJabatanModal() {
+          this.showJabatanModal = false;
+          this.selectedJabatanFilter = '';
+        },
+        exportJabatanExcel() {
+          const targetData = this.filteredJabatanEmployees;
+          if (!targetData || targetData.length === 0) return;
+
+          const currentJabatanName = this.selectedJabatanFilter || "Semua_Jabatan";
+          const wsData = [
+            ["No", "Waktu Unggah", "NIP", "Nama Lengkap", "Jabatan", "Status", "Tempat Tugas Terbaru", "Kecamatan", "Jenis Upload", "Jumlah Sertifikat", "Nomor HP", "Link File Sertifikat"]
+          ];
+
+          targetData.forEach((item, index) => {
+            wsData.push([
+              index + 1,
+              item.timestamp || "-",
+              String(item.nip),
+              item.nama,
+              item.jabatan,
+              item.statusPegawai,
+              item.tempatTugas,
+              item.kecamatan,
+              item.jenisUpload,
+              Number(item.jumlahSertifikat) || 1,
+              String(item.noHp),
+              item.fileUrl
+            ]);
+          });
+
+          const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+          // Format NIP dan Nomor HP sebagai TEXT
+          const range = XLSX.utils.decode_range(ws['!ref']);
+          for (let R = 1; R <= range.e.r; ++R) {
+            const nipCellRef = XLSX.utils.encode_cell({ c: 2, r: R });
+            if (ws[nipCellRef]) {
+              ws[nipCellRef].t = 's';
+              ws[nipCellRef].z = '@';
+            }
+            const hpCellRef = XLSX.utils.encode_cell({ c: 10, r: R });
+            if (ws[hpCellRef]) {
+              ws[hpCellRef].t = 's';
+              ws[hpCellRef].z = '@';
+            }
+          }
+
+          ws['!cols'] = [
+            { wch: 5 },  // No
+            { wch: 20 }, // Timestamp
+            { wch: 22 }, // NIP
+            { wch: 30 }, // Nama Lengkap
+            { wch: 28 }, // Jabatan
+            { wch: 18 }, // Status
+            { wch: 28 }, // Tempat Tugas
+            { wch: 15 }, // Kecamatan
+            { wch: 16 }, // Jenis Upload
+            { wch: 18 }, // Jumlah Sertifikat
+            { wch: 16 }, // No HP
+            { wch: 45 }  // Link Sertifikat
+          ];
+
+          const wb = XLSX.utils.book_new();
+          const cleanSheetTitle = currentJabatanName.replace(/[\\/?*[\]]/g, "_").slice(0, 31);
+          XLSX.utils.book_append_sheet(wb, ws, cleanSheetTitle);
+
+          const safeFileName = currentJabatanName.replace(/[^a-zA-Z0-9_-]/g, "_");
+          const fileName = `Rekap_Jabatan_${safeFileName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+          XLSX.writeFile(wb, fileName);
+        },
+
+        saveTargets() {
+          try {
+            localStorage.setItem('sertifikat_targets', JSON.stringify(this.targets));
+          } catch (e) {
+            console.warn('Gagal menyimpan target ke storage:', e);
+          }
+          this.showTargetModal = false;
+        },
+        formatWaNumber(hp) {
+          let clean = String(hp || '').replace(/[^0-9]/g, '');
+          if (clean.startsWith('0')) {
+            clean = '62' + clean.slice(1);
+          }
+          return clean;
+        },
+        openExportModal() {
+          // Set default semua terpilih saat modal dibuka jika masih kosong
+          if (!this.exportFilter.kecamatan.length) {
+            this.exportFilter.kecamatan = [...this.kecamatanList];
+          }
+          if (!this.exportFilter.status.length) {
+            this.exportFilter.status = [...this.exportStatusOptions];
+          }
+          this.showExportModal = true;
+        },
+        toggleAllExportKecamatan() {
+          if (this.exportFilter.kecamatan.length === this.kecamatanList.length) {
+            this.exportFilter.kecamatan = [];
+          } else {
+            this.exportFilter.kecamatan = [...this.kecamatanList];
+          }
+        },
+        toggleAllExportStatus() {
+          if (this.exportFilter.status.length === this.exportStatusOptions.length) {
+            this.exportFilter.status = [];
+          } else {
+            this.exportFilter.status = [...this.exportStatusOptions];
+          }
+        },
+        getExportTargetData() {
+          return this.items.filter(item => {
+            const matchKec = this.exportFilter.kecamatan.includes(item.kecamatan);
+            const matchStatus = this.exportFilter.status.includes(item.statusPegawai);
+            return matchKec && matchStatus;
+          });
+        },
+        executeExportExcel() {
+          const targetData = this.getExportTargetData();
+          if (targetData.length === 0) return;
+
+          const wsData = [
+            ["No", "Waktu Unggah", "NIP", "Nama Lengkap", "Jabatan", "Status", "Tempat Tugas Terbaru", "Kecamatan", "Jenis Upload", "Jumlah Sertifikat", "Nomor HP", "Link File Sertifikat"]
+          ];
+
+          targetData.forEach((item, index) => {
+            wsData.push([
+              index + 1,
+              item.timestamp,
+              String(item.nip),
+              item.nama,
+              item.jabatan,
+              item.statusPegawai,
+              item.tempatTugas,
+              item.kecamatan,
+              item.jenisUpload,
+              Number(item.jumlahSertifikat) || 1,
+              String(item.noHp),
+              item.fileUrl
+            ]);
+          });
+
+          const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+          // Format kolom NIP (Kolom C / Indeks 2) dan Nomor HP (Kolom K / Indeks 10) sebagai TEXT ('s')
+          const range = XLSX.utils.decode_range(ws['!ref']);
+          for (let R = 1; R <= range.e.r; ++R) {
+            const nipCellRef = XLSX.utils.encode_cell({ c: 2, r: R });
+            if (ws[nipCellRef]) {
+              ws[nipCellRef].t = 's';
+              ws[nipCellRef].z = '@';
+            }
+            const hpCellRef = XLSX.utils.encode_cell({ c: 10, r: R });
+            if (ws[hpCellRef]) {
+              ws[hpCellRef].t = 's';
+              ws[hpCellRef].z = '@';
+            }
+          }
+
+          ws['!cols'] = [
+            { wch: 5 },  // No
+            { wch: 20 }, // Timestamp
+            { wch: 22 }, // NIP
+            { wch: 30 }, // Nama Lengkap
+            { wch: 25 }, // Jabatan
+            { wch: 18 }, // Status
+            { wch: 28 }, // Tempat Tugas
+            { wch: 15 }, // Kecamatan
+            { wch: 16 }, // Jenis Upload
+            { wch: 18 }, // Jumlah Sertifikat
+            { wch: 16 }, // No HP
+            { wch: 45 }  // Link Sertifikat
+          ];
+
+          const wb = XLSX.utils.book_new();
+          const sheetTitle = this.exportFilter.kecamatan.length === 1 
+            ? `Kec_${this.exportFilter.kecamatan[0]}` 
+            : (this.exportFilter.kecamatan.length === this.kecamatanList.length ? "Semua_Kecamatan" : "Kec_Pilihan");
+          
+          XLSX.utils.book_append_sheet(wb, ws, sheetTitle);
+
+          const fileName = `Rekap_Sertifikat_${sheetTitle}_${new Date().toISOString().slice(0,10)}.xlsx`;
+          XLSX.writeFile(wb, fileName);
+          this.showExportModal = false;
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
